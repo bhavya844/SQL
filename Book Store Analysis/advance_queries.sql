@@ -58,3 +58,13 @@ group by `Name` order by total_sum desc limit 1;
 -- 9) Calculate the stock remaining after fulfilling all the orders
 
 select * from books;
+# adding the conditional function which is the COALESCE
+select * from orders;
+
+select b.Book_ID, Title , Genre, Stock, coalesce(sum(Quantity),0) as total_quantity_orders,
+b.Stock - (coalesce(sum(Quantity),0)) as remaining_quantity 
+from books b
+left join orders o 
+on b.Book_ID = o.Book_ID
+group by Title  ;
+
