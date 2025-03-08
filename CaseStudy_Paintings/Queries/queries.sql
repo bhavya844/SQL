@@ -95,6 +95,5 @@ from new_cte
 ) select museum_name, max(num_paintings) from new_cte_2
 group by museum_name order by max(num_paintings) desc limit 5 ; 
 
--- 13) Who are the top 5 most popular artists ? (Popularity is defined based on most number
--- of paintings done by an artist)
+
  
