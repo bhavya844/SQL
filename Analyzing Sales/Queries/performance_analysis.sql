@@ -9,7 +9,6 @@
 -- Analyze the yearly performance of the products by comparing each product's sales
 -- to both its average sales performance and the previous year's sales
 
-
 select year(order_date) as order_year,
 sum(sales_amount) as total_sales, 
 product_name
@@ -19,6 +18,27 @@ on f.product_key = p.product_key
 where order_date  is not null
 group by order_year, product_name
 order by order_year asc;
+
+# now let us use cte to query
+
+with new_table as (
+select year(order_date) as order_year, sum(sales_amount) as total_sales,
+product_name from `gold.fact_sales` f
+left join `gold.dim_products` p
+on f.product_key = p.product_key
+where order_date is not null
+group by product_name, order_year
+order by order_year asc
+) select *,
+round(avg(total_sales) over (partition by product_name),2) as avg_sales ,
+total_sales - avg(total_sales) over (partition by product_name) as difference,
+case 
+when total_sales > round(avg(total_sales) over (partition by product_name),2) then 'above_average'
+when total_sales = round(avg(total_sales) over (partition by product_name),2) then 'same as average'
+when total_sales < round(avg(total_sales) over (partition by product_name),2) then 'below average'
+end compare_to_average
+from new_table
+order by order_year;
 
 
 
