@@ -9,4 +9,16 @@
 -- Analyze the yearly performance of the products by comparing each product's sales
 -- to both its average sales performance and the previous year's sales
 
-select * from `gold.report_products`;
+
+select year(order_date) as order_year,
+sum(sales_amount) as total_sales, 
+product_name
+from `gold.fact_sales` f
+left join `gold.dim_products` p
+on f.product_key = p.product_key
+where order_date  is not null
+group by order_year, product_name
+order by order_year asc;
+
+
+
