@@ -38,3 +38,45 @@ select new_cte.`name`, style, count(*) as counts from new_cte
 where style in (select style from new_cte_2) 
 group by new_cte.`name`, style  
 order by counts desc limit 1;
+
+-- 17) Identify the artists whose paintings are displayed in multiple countries
+
+-- for this we would need artist, museum and work tables
+
+with work_artist as (
+select w.`name` as name_of_work, w.style, museum_id, w.artist_id,
+full_name, nationality, birth, death
+from work w
+left join artist a
+on w.artist_id = a.artist_id
+where museum_id is not null),
+work_artist_museum as (
+select m.`name` as name_of_museum, style, wa.museum_id, wa.artist_id, country,
+full_name, nationality
+from work_artist wa
+left join museum m
+on wa.museum_id = m.museum_id)
+select full_name,artist_id, 
+count(distinct(country)) as total_country
+from work_artist_museum
+group by full_name,artist_id
+having total_country >1
+order by total_country desc;
+
+-- 18) Display the country and the city with most no of museums. Output 2 seperate 
+-- columns to mention the city and country. If there are multiple value, seperate them 
+-- with comma.
+
+select country, city, count(distinct(name)) as total_museums from museum 
+group by country, city order by count(distinct(name)) desc;
+
+-- 19) Identify the artist and the museum where the most expensive and least expensive 
+-- painting is placed. Display the artist name, sale_price, painting name, museum 
+-- name, museum city and canvas label
+
+-- 20) Which country has the 5th highest no of paintings?
+
+-- 21) Which are the 3 most popular and 3 least popular painting styles?
+
+-- 22) Which artist has the most no of Portraits paintings outside USA?. Display artist 
+-- name, no of paintings and the artist nationality.
