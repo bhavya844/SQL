@@ -123,4 +123,23 @@ Formula = Current Row no (or Row No with value same as current row) / Total no o
 Query to fetch all products which are constituting the first 30% 
 of the data in products table based on price.
 */
+select product_name, round(round_cume_distribution,4) from (
+select *,
+cume_dist() over (order by price desc) as cume_distribution,
+concat(round(cume_dist() over (order by price desc) , 4) * 100, '%') as round_cume_distribution
+from product) as x
+where x.round_cume_distribution < 30;
 
+-- PERCENT_RANK (relative rank of the current row / Percentage Ranking)
+/* Formula = Current Row No - 1 / Total no of rows - 1 */
+
+-- Query to identify how much percentage more expensive is "Galaxy Z Fold 3" when compared to all products.
+select product_name, rank_in_percentage from 
+(select *,
+percent_rank() over (order by price ) as percent_ranks,
+round(percent_rank() over (order by price),5 ) * 100 as rank_in_percentage
+from product) as x
+where x.product_name = 'Galaxy Z Fold 3';
+
+-- the above query basically shows us that the Galaxy Z Fold 3 is 80.769% more expensive
+-- than all the other products in the table
