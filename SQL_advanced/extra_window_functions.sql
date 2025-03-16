@@ -66,5 +66,61 @@ last_value(product_name) over (partition by product_category order by price desc
 range between unbounded preceding and unbounded following) as least_expensive
 from product; 
 
+# we can also use the rows instead of the range. the difference will come when there 
+# are duplicate values.
+
+select *,
+last_value(product_name) over (partition by product_category order by price desc
+rows between unbounded preceding and unbounded following) as least_expensive
+from product; 
+
 # inside each of the partitions, we can again create subset of records which is known as
 # frames. So, frame is basically a subset of partition. 
+
+# alternate way of writing window functions is by using the windows in order to prevent
+# the repetition of the code
+
+select *, 
+first_value(product_name) over w as most_expensive,
+last_value(product_name) over w as least_expensive
+from product
+window w as (partition by product_category order by price desc
+range between unbounded preceding and unbounded following);
+
+-- nth value
+-- this will basically help us to display the second most expensive product under each 
+-- category.
+
+select *,
+first_value(product_name) over w as most_expensive,
+last_value(product_name) over w as least_expensive,
+nth_value(product_name, 2 ) over w as second_most_expensive,
+row_number() over (partition by product_category) as rn
+from product
+window w as (partition by product_category order by price desc
+range between unbounded preceding and unbounded following);
+
+-- nth tile window function
+-- It is basically used to group together a set of data within the partition and then 
+-- place it into certain buckets and then sql will try its best that each bucket within 
+-- the partition will have equal number of records
+
+-- write a query to segregate all the expensive phones, mid range phones and the cheaper phones
+
+select product_name, 
+case when x.buckets = 1 then 'Cheap phones'
+when x.buckets = 2 then 'Mid Range Phones'
+else 'Expensive Phones'
+end range_of_phones from 
+(   select *,
+	ntile(3) over (order by price ) as buckets 
+	from product
+	where product_category = 'Phone') as x;
+    
+/* cume_dist (cumulative distribution) 
+Formula = Current Row no (or Row No with value same as current row) / Total no of rows 
+
+Query to fetch all products which are constituting the first 30% 
+of the data in products table based on price.
+*/
+
