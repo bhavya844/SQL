@@ -23,10 +23,15 @@ group by size_id order by count(size_id) asc limit 4) as subquery);
 
 -- 15) Which museum is open for longest during a day ? Display museum name, state and hours
 -- open and which day ?
-
-select * from museum_hours;
-select *, substring(`open`, 1,5) - substring(`close`,1,5) from museum_hours;
-select *, (time(`open`)- time(`close`)) as hours_open from museum_hours;
+select museum_name,state as city,day, open, close, duration
+	from (	select m.name as museum_name, m.state, day, open, close
+			, timestamp(open,'HH:MI AM') 
+			, timestamp(close,'HH:MI PM') 
+			, timestamp(close,'HH:MI PM') - timestamp(open,'HH:MI AM') as duration
+			, rank() over (order by (timestamp(close,'HH:MI PM') - timestamp(open,'HH:MI AM')) desc) as rnk
+			from museum_hours mh
+		 	join museum m on m.museum_id=mh.museum_id) x
+	where x.rnk=1;
 
 -- 16) Which museum has the most number of popular painting style ?
 with new_cte as (select m.`name`, w.museum_id, style from museum m
