@@ -40,3 +40,20 @@ commit;
 /*Queries that we are going to solve are:
 1) Display number from 1 to 10 without using built in functions*/
 
+with recursive numbers as (
+select 1 as n
+union 
+select n+1 from numbers where n < 10
+) select * from numbers;
+
+
+# 2) Find the hierarchy of the employees under a given manager "Asha"
+
+with recursive emp_hierarchy as 
+(	select id, name, manager_id, designation, 1 as level from emp_details
+	where name = 'Asha' 
+    union
+    select E.id, E.name, E.manager_id, E.designation, H.level + 1 as level
+    from emp_hierarchy h join emp_details e on
+    h.id = e.manager_id
+) select * from emp_hierarchy;
