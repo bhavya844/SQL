@@ -57,3 +57,17 @@ with recursive emp_hierarchy as
     from emp_hierarchy h join emp_details e on
     h.id = e.manager_id
 ) select * from emp_hierarchy;
+
+
+# 3) Find the hierarchy of managers for a given employee
+with recursive managers as
+	(select id as emp_id, name as emp_name, manager_id
+	 , designation as emp_role, 1 as level
+	 from emp_details e where id=7
+	 union
+	 select e.id as emp_id, e.name as emp_name, e.manager_id
+	 , e.designation as emp_role, level+1 as level
+	 from emp_details e
+	 join managers m on m.manager_id = e.id)
+select *
+from managers;
