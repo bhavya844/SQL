@@ -15,11 +15,32 @@ from new_cte
 ) select full_name, max(pop_num) as max_num from new_cte_2
 group by full_name order by max_num desc limit 5;
 
+# another approach
+
+select * from artist;
+select * from work;
+with new_cte as (
+select a.artist_id , full_name, w.name as work_name from artist a 
+right join work w on
+a.artist_id = w.artist_id)
+select artist_id, full_name, count(artist_id) from new_cte
+group by artist_id, full_name order by count(artist_id) desc limit 5;
+
 -- 14) Display the least 3 popular canva sizes
 
 select * from canvas_size where size_id in 
 (select size_id from (select size_id, count(size_id) from product_size
 group by size_id order by count(size_id) asc limit 4) as subquery); 
+
+# another approach
+
+with new_cte as (select c.size_id, work_id, width, height from canvas_size c
+right join product_size p
+on c.size_id = p.size_id)
+select size_id from new_cte where size_id in ( select size_id from (
+select size_id, count(size_id) from new_cte
+group by size_id 
+having size_id is not null order by count(size_id) limit 3) as subquery) ;
 
 -- 15) Which museum is open for longest during a day ? Display museum name, state and hours
 -- open and which day ?
@@ -43,6 +64,8 @@ select new_cte.`name`, style, count(*) as counts from new_cte
 where style in (select style from new_cte_2) 
 group by new_cte.`name`, style  
 order by counts desc limit 1;
+
+# alternate approach
 
 -- 17) Identify the artists whose paintings are displayed in multiple countries
 
