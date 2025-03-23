@@ -96,4 +96,32 @@ from new_cte
 group by museum_name order by max(num_paintings) desc limit 5 ; 
 
 
+
+-- 12) Which are the top 5 most popular museum? (Popularity is defined based on the most
+-- number of paintings in a museum)
+
+use casestudy_paintings;
+
+with new_cte as (
+select m.museum_id, m.name as museum_name, w.name as work_name, style from museum m
+left join work w
+on m.museum_id = w.museum_id)
+select museum_id, museum_name, count(museum_id) from new_cte
+group by museum_id, museum_name order by count(museum_id) desc limit 5;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  
