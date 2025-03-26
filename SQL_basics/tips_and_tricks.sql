@@ -1,0 +1,1 @@
+# this file has some tips and tricks for sql
