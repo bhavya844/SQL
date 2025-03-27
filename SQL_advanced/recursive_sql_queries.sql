@@ -1,19 +1,23 @@
-# here we are going to solve problems using recursive sql queries
+-- with recursive cte as (
+-- select query (non recursive part of the query )
 
-# here we need to have two separate queries which need to be merged with the help 
-# of Union.
+-- union
+
+-- select query using CTE Name [with a termination condition])
+-- )
+-- select * from cte_name;
 
 
--- syntax for using the recursive queries
-/*
-WITH [RECURSIVE] CTE_name AS
-(
-     SELECT query (Non Recursive query or the Base query)
-    UNION [ALL]
- SELECT query (Recursive query using CTE_name [with a termination condition])
-)
-SELECT * FROM CTE_name;
-*/
+-- display number from 1 to 10 without using any built in function
+
+with recursive cte as (
+select 1 as n
+union
+select n+1 from cte where n < 10
+) select * from cte;
+
+
+-- Find the hierarchy of the employees under a given manager "Asha"
 
 CREATE TABLE emp_details
     (
@@ -37,37 +41,40 @@ INSERT INTO emp_details VALUES (9,  'Reshma', 8, 2000, 'Business Analyst');
 INSERT INTO emp_details VALUES (10, 'Akshay', 8, 2500, 'Java Developer');
 commit;
 
-/*Queries that we are going to solve are:
-1) Display number from 1 to 10 without using built in functions*/
+select * from emp_details;
 
-with recursive numbers as (
-select 1 as n
-union 
-select n+1 from numbers where n < 10
-) select * from numbers;
-
-
-# 2) Find the hierarchy of the employees under a given manager "Asha"
-
-with recursive emp_hierarchy as 
-(	select id, name, manager_id, designation, 1 as level from emp_details
-	where name = 'Asha' 
-    union
-    select E.id, E.name, E.manager_id, E.designation, H.level + 1 as level
-    from emp_hierarchy h join emp_details e on
-    h.id = e.manager_id
-) select * from emp_hierarchy;
+with recursive cte as (
+select id, name, manager_id, designation, 1 as lvl from emp_details where name = "Asha"
+union
+select e.id, e.name, e.manager_id, e.designation , lvl+1 as level from cte H
+join emp_details e on H.id = e.manager_id 
+) select * from cte;
 
 
-# 3) Find the hierarchy of managers for a given employee
-with recursive managers as
-	(select id as emp_id, name as emp_name, manager_id
-	 , designation as emp_role, 1 as level
-	 from emp_details e where id=7
-	 union
-	 select e.id as emp_id, e.name as emp_name, e.manager_id
-	 , e.designation as emp_role, level+1 as level
-	 from emp_details e
-	 join managers m on m.manager_id = e.id)
-select *
-from managers;
+with recursive cte as (
+select id, name, manager_id, designation, 1 as lvl from emp_details where name = "Asha"
+union
+select e.id, e.name, e.manager_id, e.designation , lvl+1 as level from cte H
+join emp_details e on H.id = e.manager_id 
+) select c.name as emp_name, c.id, e.manager_id, e.name as manager_name from cte c
+join emp_details e on c.manager_id = e.id ;
+  
+-- Find the hierarchy of the employees (up the chain of managerial positions)
+
+
+select * from emp_details;
+
+select id, manager_id, name, designation, 1 as lvl from emp_details 
+  where name = "David";
+
+with recursive emp_hierarchy as (
+  select id, manager_id, name, 1 as lvl from emp_details 
+  where name = "David"
+  union 
+  select e.id, e.manager_id, e.name, h.lvl+1 as lvl from emp_hierarchy h 
+  join emp_details e on h.manager_id = e.id where h.manager_id is not null
+  ) select  h.id, h.name as employee_name, e.name as manager_name, h.manager_id as manager_id
+  from emp_hierarchy h join emp_details e 
+  on h.manager_id = e.id;
+
+
